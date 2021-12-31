@@ -6,12 +6,15 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
     
     var items:[Item] = []
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+//    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,11 +31,14 @@ class ToDoListViewController: UITableViewController {
             textField = alertTextField
         }
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
-            let item = Item()
+ 
+            let item = Item(context: self.context)
             item.text = textField.text!
+            item.checked = false
+    
             self.items.append(item)
             self.saveData()
-            self.tableView.reloadData()
+            
         }
         
         alert.addAction(action)
@@ -59,33 +65,52 @@ class ToDoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         items[indexPath.row].checked = !items[indexPath.row].checked
+        
         saveData()
-        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
     //MARK: - Data Manipulation
     
+//    func saveData() {
+//        let encoder = PropertyListEncoder()
+//        do {
+//            let data = try encoder.encode(items)
+//            try data.write(to: dataFilePath!)
+//        } catch {
+//            print("Problem with encoding data: \(error)")
+//        }
+//    }
+    
     func saveData() {
-        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(items)
-            try data.write(to: dataFilePath!)
+            try context.save()
         } catch {
-            print("Problem with encoding data: \(error)")
+            print("Error saving context: \(error)")
         }
+        self.tableView.reloadData()
     }
     
+//    func loadData() {
+//
+//        if let data = try? Data(contentsOf: dataFilePath!) {
+//            let decoder = PropertyListDecoder()
+//            do {
+//                items = try decoder.decode([Item].self, from: data)
+//            } catch {
+//                print("Unable to decode data: \(error)")
+//            }
+//
+//        }
+//    }
+    
     func loadData() {
-        
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                items = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("Unable to decode data: \(error)")
-            }
-            
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            items = try context.fetch(request)
+        } catch {
+            print("Unable to fetch data: \(error)")
         }
+        
     }
 }
