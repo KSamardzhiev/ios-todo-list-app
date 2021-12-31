@@ -9,20 +9,13 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
     
-    var items = [
-        "Buy milk",
-        "Go for a walk",
-        "Call friend"
-    ]
+    var items:[Item] = []
     
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if let safeItems = defaults.array(forKey: "ToDoListItems") as? [String] {
-            items = safeItems
-        }
+        loadData()
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -35,14 +28,17 @@ class ToDoListViewController: UITableViewController {
             textField = alertTextField
         }
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
-            self.items.append(textField.text!)
-            self.defaults.set(self.items, forKey: "ToDoListItems")
+            let item = Item()
+            item.text = textField.text!
+            self.items.append(item)
+            self.saveData()
             self.tableView.reloadData()
         }
         
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+    
     //MARK: - UITableViewController
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -53,19 +49,43 @@ class ToDoListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToListReuseableCell", for: indexPath)
         
         var config = cell.defaultContentConfiguration()
-        config.text = items[indexPath.row]
+        config.text = items[indexPath.row].text
+        
+        cell.accessoryType = items[indexPath.row].checked ? .checkmark : .none
+        
         cell.contentConfiguration = config
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        items[indexPath.row].checked = !items[indexPath.row].checked
+        saveData()
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    //MARK: - Data Manipulation
     
+    func saveData() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(items)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Problem with encoding data: \(error)")
+        }
+    }
+    
+    func loadData() {
+        
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                items = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Unable to decode data: \(error)")
+            }
+            
+        }
+    }
 }
