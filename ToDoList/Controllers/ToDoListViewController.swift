@@ -104,13 +104,41 @@ class ToDoListViewController: UITableViewController {
 //        }
 //    }
     
-    func loadData() {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
+    func loadData(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         do {
             items = try context.fetch(request)
         } catch {
             print("Unable to fetch data: \(error)")
         }
         
+        tableView.reloadData()
+    }
+}
+
+//MARK: - Search Bar Delegate methods
+
+extension ToDoListViewController: UISearchBarDelegate {
+    
+    func performSearch(with sq: String) {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        request.predicate = NSPredicate(format: "text CONTAINS[cd] %@", sq)
+        request.sortDescriptors = [NSSortDescriptor(key: "text", ascending: true)]
+       
+        loadData(with: request)
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        performSearch(with: searchBar.text!)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            loadData()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        } else {
+            performSearch(with: searchText)
+        }
     }
 }
