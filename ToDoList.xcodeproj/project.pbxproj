@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F811CE952780BC550028C6F6 /* CategoryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F811CE942780BC550028C6F6 /* CategoryTableViewController.swift */; };
 		F8451647277F563D00201CB7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8451646277F563D00201CB7 /* AppDelegate.swift */; };
 		F8451649277F563D00201CB7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8451648277F563D00201CB7 /* SceneDelegate.swift */; };
 		F845164B277F563D00201CB7 /* ToDoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F845164A277F563D00201CB7 /* ToDoListViewController.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F811CE942780BC550028C6F6 /* CategoryTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTableViewController.swift; sourceTree = "<group>"; };
 		F8451643277F563D00201CB7 /* ToDoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ToDoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8451646277F563D00201CB7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F8451648277F563D00201CB7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 		F811CE8B277F57C90028C6F6 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				F811CE942780BC550028C6F6 /* CategoryTableViewController.swift */,
 				F845164A277F563D00201CB7 /* ToDoListViewController.swift */,
 			);
 			path = Controllers;
@@ -287,6 +290,7 @@
 			files = (
 				F845164B277F563D00201CB7 /* ToDoListViewController.swift in Sources */,
 				F8451647277F563D00201CB7 /* AppDelegate.swift in Sources */,
+				F811CE952780BC550028C6F6 /* CategoryTableViewController.swift in Sources */,
 				F8451649277F563D00201CB7 /* SceneDelegate.swift in Sources */,
 				F8451651277F563D00201CB7 /* ToDoList.xcdatamodeld in Sources */,
 			);

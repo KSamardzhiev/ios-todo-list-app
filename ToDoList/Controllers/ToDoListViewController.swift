@@ -11,6 +11,11 @@ import CoreData
 class ToDoListViewController: UITableViewController {
     
     var items:[Item] = []
+    var category:Category? {
+        didSet {
+            loadData()
+        }
+    }
     
 //    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
@@ -18,7 +23,6 @@ class ToDoListViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadData()
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -35,6 +39,9 @@ class ToDoListViewController: UITableViewController {
             let item = Item(context: self.context)
             item.text = textField.text!
             item.checked = false
+            if let safeCategory = self.category {
+                item.parentCategory = safeCategory
+            }
     
             self.items.append(item)
             self.saveData()
@@ -104,7 +111,15 @@ class ToDoListViewController: UITableViewController {
 //        }
 //    }
     
-    func loadData(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+    func loadData(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", category!.name!)
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        } else {
+            request.predicate = categoryPredicate
+        }
+
         do {
             items = try context.fetch(request)
         } catch {
@@ -121,10 +136,10 @@ extension ToDoListViewController: UISearchBarDelegate {
     
     func performSearch(with sq: String) {
         let request: NSFetchRequest<Item> = Item.fetchRequest()
-        request.predicate = NSPredicate(format: "text CONTAINS[cd] %@", sq)
+        let predicate = NSPredicate(format: "text CONTAINS[cd] %@", sq)
         request.sortDescriptors = [NSSortDescriptor(key: "text", ascending: true)]
        
-        loadData(with: request)
+        loadData(with: request, predicate: predicate)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
