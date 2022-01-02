@@ -6,20 +6,17 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class ToDoListViewController: UITableViewController {
     
-    var items:[Item] = []
+    let realm = try! Realm()
+    var items:Results<Item>?
     var category:Category? {
         didSet {
             loadData()
         }
     }
-    
-//    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,16 +33,20 @@ class ToDoListViewController: UITableViewController {
         }
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
  
-            let item = Item(context: self.context)
-            item.text = textField.text!
-            item.checked = false
             if let safeCategory = self.category {
-                item.parentCategory = safeCategory
+                do {
+                    try self.realm.write {
+                        let item = Item()
+                        item.text = textField.text!
+                        item.dateCreated = Date().timeIntervalSince1970
+                        safeCategory.items.append(item)
+                    }
+                } catch {
+                    print("Unable to save the item: \(error)")
+                }
             }
-    
-            self.items.append(item)
-            self.saveData()
             
+            self.tableView.reloadData()
         }
         
         alert.addAction(action)
@@ -55,77 +56,44 @@ class ToDoListViewController: UITableViewController {
     //MARK: - UITableViewController
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        return items?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToListReuseableCell", for: indexPath)
-        
         var config = cell.defaultContentConfiguration()
-        config.text = items[indexPath.row].text
         
-        cell.accessoryType = items[indexPath.row].checked ? .checkmark : .none
-        
+        if let item = items?[indexPath.row] {
+            config.text = item.text
+            cell.accessoryType = item.checked ? .checkmark : .none
+        } else {
+            config.text = "No Items Added"
+        }
         cell.contentConfiguration = config
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        items[indexPath.row].checked = !items[indexPath.row].checked
+        if let item = items?[indexPath.row] {
+            do {
+                try realm.write({
+                    item.checked = !item.checked
+                })
+                tableView.reloadData()
+            } catch {
+                print("Unable to change state of item: \(error)")
+            }
+        }
         
-        saveData()
+        
         tableView.deselectRow(at: indexPath, animated: true)
+        
     }
     
     //MARK: - Data Manipulation
     
-//    func saveData() {
-//        let encoder = PropertyListEncoder()
-//        do {
-//            let data = try encoder.encode(items)
-//            try data.write(to: dataFilePath!)
-//        } catch {
-//            print("Problem with encoding data: \(error)")
-//        }
-//    }
-    
-    func saveData() {
-        do {
-            try context.save()
-        } catch {
-            print("Error saving context: \(error)")
-        }
-        self.tableView.reloadData()
-    }
-    
-//    func loadData() {
-//
-//        if let data = try? Data(contentsOf: dataFilePath!) {
-//            let decoder = PropertyListDecoder()
-//            do {
-//                items = try decoder.decode([Item].self, from: data)
-//            } catch {
-//                print("Unable to decode data: \(error)")
-//            }
-//
-//        }
-//    }
-    
-    func loadData(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
-        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", category!.name!)
-        
-        if let additionalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
-        } else {
-            request.predicate = categoryPredicate
-        }
-
-        do {
-            items = try context.fetch(request)
-        } catch {
-            print("Unable to fetch data: \(error)")
-        }
-        
+    func loadData() {
+        items = category?.items.sorted(byKeyPath: "text", ascending: true)
         tableView.reloadData()
     }
 }
@@ -135,11 +103,8 @@ class ToDoListViewController: UITableViewController {
 extension ToDoListViewController: UISearchBarDelegate {
     
     func performSearch(with sq: String) {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
-        let predicate = NSPredicate(format: "text CONTAINS[cd] %@", sq)
-        request.sortDescriptors = [NSSortDescriptor(key: "text", ascending: true)]
-       
-        loadData(with: request, predicate: predicate)
+        items = items?.filter("text CONTAINS[cd] %@", sq).sorted(byKeyPath: "dateCreated", ascending: true)
+        tableView.reloadData()
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
