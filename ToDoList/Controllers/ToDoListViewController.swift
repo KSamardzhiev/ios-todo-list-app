@@ -8,7 +8,7 @@
 import UIKit
 import RealmSwift
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     var items:Results<Item>?
@@ -20,6 +20,7 @@ class ToDoListViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80.0
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -60,7 +61,7 @@ class ToDoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToListReuseableCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         var config = cell.defaultContentConfiguration()
         
         if let item = items?[indexPath.row] {
@@ -95,6 +96,18 @@ class ToDoListViewController: UITableViewController {
     func loadData() {
         items = category?.items.sorted(byKeyPath: "text", ascending: true)
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let safeItem = items?[indexPath.row] {
+            do {
+                try self.realm.write({
+                    self.realm.delete(safeItem)
+                })
+            } catch {
+                print("Unable to delete item: \(error)")
+            }
+        }
     }
 }
 

@@ -8,7 +8,7 @@
 import UIKit
 import RealmSwift
 
-class CategoryTableViewController: UITableViewController {
+class CategoryTableViewController: SwipeTableViewController {
 
     let realm = try! Realm()
     var categories:Results<Category>?
@@ -16,6 +16,8 @@ class CategoryTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadData()
+        
+        tableView.rowHeight = 80.0
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -47,14 +49,14 @@ class CategoryTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         var config = cell.defaultContentConfiguration()
         
         config.text = categories?[indexPath.row].name ?? "No categories added"
-        
+
         cell.contentConfiguration = config
-        
+
         return cell
     }
     
@@ -91,6 +93,18 @@ class CategoryTableViewController: UITableViewController {
     func loadData() {
         categories = realm.objects(Category.self)
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let categoryToDelete = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write({
+                    self.realm.delete(categoryToDelete)
+                })
+            } catch {
+                print("Unable to delete category: \(error)")
+            }
+        }
     }
     
 }
