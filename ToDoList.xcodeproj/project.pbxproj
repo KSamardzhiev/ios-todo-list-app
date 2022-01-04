@@ -14,6 +14,7 @@
 		F811CEA42781CB960028C6F6 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F811CEA32781CB960028C6F6 /* Category.swift */; };
 		F811CEAA27838CDE0028C6F6 /* SwipeCellKit in Frameworks */ = {isa = PBXBuildFile; productRef = F811CEA927838CDE0028C6F6 /* SwipeCellKit */; };
 		F811CEAC2783922B0028C6F6 /* SwipeTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F811CEAB2783922B0028C6F6 /* SwipeTableViewController.swift */; };
+		F81A808E2784F54500858699 /* DynamicColor in Frameworks */ = {isa = PBXBuildFile; productRef = F81A808D2784F54500858699 /* DynamicColor */; };
 		F8451647277F563D00201CB7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8451646277F563D00201CB7 /* AppDelegate.swift */; };
 		F8451649277F563D00201CB7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8451648277F563D00201CB7 /* SceneDelegate.swift */; };
 		F845164B277F563D00201CB7 /* ToDoListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F845164A277F563D00201CB7 /* ToDoListViewController.swift */; };
@@ -67,6 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F81A808E2784F54500858699 /* DynamicColor in Frameworks */,
 				F811CE9A278115750028C6F6 /* RealmSwift in Frameworks */,
 				F811CEAA27838CDE0028C6F6 /* SwipeCellKit in Frameworks */,
 				F811CE98278115750028C6F6 /* Realm in Frameworks */,
@@ -189,6 +191,7 @@
 				F811CE97278115750028C6F6 /* Realm */,
 				F811CE99278115750028C6F6 /* RealmSwift */,
 				F811CEA927838CDE0028C6F6 /* SwipeCellKit */,
+				F81A808D2784F54500858699 /* DynamicColor */,
 			);
 			productName = ToDoList;
 			productReference = F8451643277F563D00201CB7 /* ToDoList.app */;
@@ -265,6 +268,7 @@
 			packageReferences = (
 				F811CE96278115750028C6F6 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				F811CEA827838CDE0028C6F6 /* XCRemoteSwiftPackageReference "SwipeCellKit" */,
+				F81A808C2784F54500858699 /* XCRemoteSwiftPackageReference "DynamicColor" */,
 			);
 			productRefGroup = F8451644277F563D00201CB7 /* Products */;
 			projectDirPath = "";
@@ -677,6 +681,14 @@
 				version = 2.7.1;
 			};
 		};
+		F81A808C2784F54500858699 /* XCRemoteSwiftPackageReference "DynamicColor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yannickl/DynamicColor.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -694,6 +706,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F811CEA827838CDE0028C6F6 /* XCRemoteSwiftPackageReference "SwipeCellKit" */;
 			productName = SwipeCellKit;
+		};
+		F81A808D2784F54500858699 /* DynamicColor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F81A808C2784F54500858699 /* XCRemoteSwiftPackageReference "DynamicColor" */;
+			productName = DynamicColor;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

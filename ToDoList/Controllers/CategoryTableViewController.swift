@@ -7,6 +7,7 @@
 
 import UIKit
 import RealmSwift
+import DynamicColor
 
 class CategoryTableViewController: SwipeTableViewController {
 
