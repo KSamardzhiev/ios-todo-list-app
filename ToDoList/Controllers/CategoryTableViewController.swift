@@ -13,10 +13,17 @@ class CategoryTableViewController: SwipeTableViewController {
 
     let realm = try! Realm()
     var categories:Results<Category>?
+    var hslPalette:[DynamicColor] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         loadData()
+        let blue   = UIColor(hexString: "#3498db")
+        let red    = UIColor(hexString: "#e74c3c")
+        let yellow = UIColor(hexString: "#f1c40f")
+
+        let gradient = DynamicGradient(colors: [blue, red, yellow])
+        hslPalette = gradient.colorPalette(amount: 12, inColorSpace: .hsl)
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -30,6 +37,7 @@ class CategoryTableViewController: SwipeTableViewController {
         let action = UIAlertAction(title: "Add", style: .default) { action in
             let newCat = Category()
             newCat.name = textField.text!
+            newCat.colour = self.hslPalette[Int.random(in: 0...11)].toHexString()
             self.saveData(category: newCat)
         }
         alertController.addAction(action)
@@ -51,10 +59,14 @@ class CategoryTableViewController: SwipeTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         var config = cell.defaultContentConfiguration()
+        var backgroundConfig = UIBackgroundConfiguration.listPlainCell()
         
         config.text = categories?[indexPath.row].name ?? "No categories added"
+        config.textProperties.color = .white
+        backgroundConfig.backgroundColor = DynamicColor(hexString: categories?[indexPath.row].colour ?? "#ffffff")
 
         cell.contentConfiguration = config
+        cell.backgroundConfiguration = backgroundConfig
 
         return cell
     }

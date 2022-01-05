@@ -63,14 +63,18 @@ class ToDoListViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         var config = cell.defaultContentConfiguration()
+        var backgroundConfig = UIBackgroundConfiguration.listPlainCell()
         
         if let item = items?[indexPath.row] {
             config.text = item.text
+            config.textProperties.color = .white
             cell.accessoryType = item.checked ? .checkmark : .none
+            backgroundConfig.backgroundColor = DynamicColor(hexString: category!.colour).darkened(amount: CGFloat(indexPath.row)/CGFloat(items!.count*2))
         } else {
             config.text = "No Items Added"
         }
         cell.contentConfiguration = config
+        cell.backgroundConfiguration = backgroundConfig
         return cell
     }
     
