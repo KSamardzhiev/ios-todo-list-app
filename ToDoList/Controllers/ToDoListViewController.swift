@@ -18,11 +18,21 @@ class ToDoListViewController: SwipeTableViewController {
             loadData()
         }
     }
-
+    
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        if let hexColourString = category?.colour {
+            let dynamicColour = DynamicColor(hexString: hexColourString)
+            self.navigationController?.navigationBar.backgroundColor = dynamicColour
+            searchBar.barTintColor = dynamicColour
+        }
+    }
+
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()

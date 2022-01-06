@@ -26,6 +26,13 @@ class CategoryTableViewController: SwipeTableViewController {
         hslPalette = gradient.colorPalette(amount: 12, inColorSpace: .hsl)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        if let hexColourString = categories?[0].colour {
+            let dynamicColour = DynamicColor(hexString: hexColourString)
+            self.navigationController?.navigationBar.backgroundColor = dynamicColour
+        }
+    }
+    
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         var textField:UITextField = UITextField()
         
