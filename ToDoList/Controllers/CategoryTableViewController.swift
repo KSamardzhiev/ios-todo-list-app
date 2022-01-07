@@ -6,17 +6,31 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
+import DynamicColor
 
-class CategoryTableViewController: UITableViewController {
+class CategoryTableViewController: SwipeTableViewController {
 
-    var categories:[Category] = []
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let realm = try! Realm()
+    var categories:Results<Category>?
+    var hslPalette:[DynamicColor] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         loadData()
+        let blue   = UIColor(hexString: "#3498db")
+        let red    = UIColor(hexString: "#e74c3c")
+        let yellow = UIColor(hexString: "#f1c40f")
+
+        let gradient = DynamicGradient(colors: [blue, red, yellow])
+        hslPalette = gradient.colorPalette(amount: 12, inColorSpace: .hsl)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let hexColourString = categories?[0].colour {
+            let dynamicColour = DynamicColor(hexString: hexColourString)
+            self.navigationController?.navigationBar.backgroundColor = dynamicColour
+        }
     }
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -28,10 +42,10 @@ class CategoryTableViewController: UITableViewController {
             textField = alertTextField
         }
         let action = UIAlertAction(title: "Add", style: .default) { action in
-            let newCat = Category(context: self.context)
+            let newCat = Category()
             newCat.name = textField.text!
-            self.categories.append(newCat)
-            self.saveData()
+            newCat.colour = self.hslPalette[Int.random(in: 0...11)].toHexString()
+            self.saveData(category: newCat)
         }
         alertController.addAction(action)
         
@@ -45,18 +59,22 @@ class CategoryTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         var config = cell.defaultContentConfiguration()
+        var backgroundConfig = UIBackgroundConfiguration.listPlainCell()
         
-        config.text = categories[indexPath.row].name
-        
+        config.text = categories?[indexPath.row].name ?? "No categories added"
+        config.textProperties.color = .white
+        backgroundConfig.backgroundColor = DynamicColor(hexString: categories?[indexPath.row].colour ?? "#ffffff")
+
         cell.contentConfiguration = config
-        
+        cell.backgroundConfiguration = backgroundConfig
+
         return cell
     }
     
@@ -70,7 +88,7 @@ class CategoryTableViewController: UITableViewController {
         if segue.identifier == "goToItems" {
             let destinationVC = segue.destination as! ToDoListViewController
             if let indexPath = tableView.indexPathForSelectedRow {
-                destinationVC.category = categories[indexPath.row]
+                destinationVC.category = categories?[indexPath.row]
             }
             
         }
@@ -79,9 +97,11 @@ class CategoryTableViewController: UITableViewController {
     
     //MARK: - Data Manipulation Methods
     
-    func saveData() {
+    func saveData(category: Category) {
         do {
-            try context.save()
+            try realm.write({
+                realm.add(category)
+            })
         } catch {
             print("Unable to save data: \(error)")
         }
@@ -89,13 +109,20 @@ class CategoryTableViewController: UITableViewController {
     }
     
     func loadData() {
-        let request: NSFetchRequest<Category> = Category.fetchRequest()
-        do {
-            categories = try context.fetch(request)
-        } catch {
-            print("Unable to fetch categories: \(error)")
-        }
+        categories = realm.objects(Category.self)
         tableView.reloadData()
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let categoryToDelete = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write({
+                    self.realm.delete(categoryToDelete)
+                })
+            } catch {
+                print("Unable to delete category: \(error)")
+            }
+        }
     }
     
 }
